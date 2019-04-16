@@ -13,6 +13,7 @@ export class LoginPage implements OnInit {
   loader : any;
   user: User = new User();
   errorMessage:string;
+  isDismiss = false;
 
   constructor(public authService:AuthService, private menu: MenuController
   , public loadingCtrl: LoadingController,
@@ -25,11 +26,11 @@ export class LoginPage implements OnInit {
   login(){
     this.presentLoading();
     this.authService.login(this.user).subscribe(data => {
-      this.loader.dismiss();
+      this.dismiss();
       this.router.navigate(['/home']);
     },err =>{
       this.errorMessage ="Username or password is incorrect";
-      this.loader.dismiss();
+      this.dismiss();
     });
   }
 
@@ -37,7 +38,19 @@ export class LoginPage implements OnInit {
     this.loader = await this.loadingCtrl.create({
       message: 'Please wait...'
     });
-    await this.loader.present();
+    await this.loader.present().then(()=> {
+      if(this.isDismiss){
+        this.loader.dismiss();
+      }
+    });
+  }
+
+  async dismiss() {
+    this.isDismiss = true;
+    if(!this.loader){
+      return;
+    }
+  return await this.loader.dismiss().then(() => console.log('dismissed'));
   }
 
 }
