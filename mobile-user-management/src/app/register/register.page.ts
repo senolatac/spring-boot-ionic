@@ -13,6 +13,7 @@ export class RegisterPage implements OnInit {
   user: User = new User();
   errorMessage: string;
   loader: any;
+  isDismiss = false;
 
   constructor(private authService: AuthService, private router: Router,
   private menuController: MenuController, private loadingCtrl: LoadingController) { }
@@ -24,11 +25,11 @@ export class RegisterPage implements OnInit {
   register(){
     this.presentLoading();
     this.authService.register(this.user).subscribe(data=> {
-      this.loader.dismiss();
+      this.dismiss();
       this.router.navigate(['/login']);
     },err => {
       this.errorMessage = "Username already exist";
-      this.loader.dismiss();
+      this.dismiss();
     });
   }
 
@@ -36,7 +37,19 @@ export class RegisterPage implements OnInit {
     this.loader = await this.loadingCtrl.create({
       message: 'Please wait...'
     });
-    await this.loader.present();
+    await this.loader.present().then(()=> {
+      if(this.isDismiss){
+        this.loader.dismiss();
+      }
+    });
+  }
+
+  async dismiss() {
+    this.isDismiss = true;
+    if(!this.loader){
+      return;
+    }
+  return await this.loader.dismiss().then(() => console.log('dismissed'));
   }
 
 }
